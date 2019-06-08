@@ -1,0 +1,15 @@
+.live-number {
+    text-underline-position: below;
+    text-decoration: underline;
+    transition: color 400ms;
+}
+
+.live-number:hover {
+    color: rgb(0, 97, 194);
+}
+
+.live-number-active {
+    color: rgb(0, 128, 255);
+}
+
+/*# sourceMappingURL=/test.e98b79dd.css.map */
