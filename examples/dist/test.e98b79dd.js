@@ -117,138 +117,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"../math-util.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.clamp = clamp;
-exports.smoothstep = smoothstep;
-exports.smoothBetween = smoothBetween;
-
-// force number between two values
-function clamp(val, min, max) {
-  return Math.max(min, Math.min(val, max));
-}
-
-function distance(x, y) {
-  return Math.abs(x - y);
-} // from https://thebookofshaders.com/glossary/?search=smoothstep
-
-
-function smoothstep(x, min, max) {
-  var t = clamp(distance(x, min) / distance(max, min), 0.0, 1.0);
-  return t * t * (3.0 - 2.0 * t);
-}
-
-function smoothBetween(val, _ref) {
-  var min = _ref.min,
-      max = _ref.max;
-  return clamp(min + distance(max, min) * val, min, max);
-}
-},{}],"../index.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.text = text;
-exports.number = number;
-
-var _mathUtil = require("./math-util.js");
-
-function text(element) {}
-
-var defaultConfig = {
-  axis: 'y',
-  inital: 0,
-  doubleClickReset: true,
-  changeFactor: 2,
-  format: function format(n) {
-    return n.toPrecision(4);
-  }
-};
-
-function number(element, config) {
-  config = Object.assign(defaultConfig, config);
-  var listeners = [function (v) {
-    return element.textContent = config.format(v);
-  }];
-  var frameId = null;
-  var windowSize = 'x' === config.axis ? window.innerWidth : window.innerHeight; // if (config.range) config.changeFactor = distance(config.range.min, config.range.max,)
-
-  function positionOnAxis(el) {
-    return 'x' === config.axis ? el.clientX : el.clientY;
-  }
-
-  function listen(f) {
-    listeners.push(f);
-    return function () {
-      listeners = listeners.filter(function (x) {
-        return x !== f;
-      });
-    };
-  }
-
-  function set(x) {
-    if (frameId !== null) cancelAnimationFrame(frameId);
-    if (listeners.length === 0) return;
-    frameId = requestAnimationFrame(function () {
-      frameId = null;
-      listeners.forEach(function (l) {
-        return l(x);
-      });
-    });
-  }
-
-  function calcValue(diff) {
-    if (config.hasOwnProperty("range")) {
-      return (0, _mathUtil.smoothBetween)(diff, config.range);
-    } else return diff;
-  }
-
-  function handleStart(ev) {
-    ev.preventDefault();
-    ev.stopPropagation();
-    var zeroPos = positionOnAxis(ev);
-    var maxPos = windowSize / config.changeFactor;
-    element.classList.add('live-number-active');
-
-    function handleMove(ev) {
-      var pos = positionOnAxis(ev);
-      set(calcValue((pos - zeroPos) / maxPos));
-    }
-
-    var handler = window.addEventListener('mousemove', handleMove);
-    window.addEventListener('mouseup', function () {
-      window.removeEventListener("mousemove", handleMove);
-      element.classList.remove('live-number-active');
-    });
-  }
-
-  function handleDblClick() {
-    set(config.inital);
-  }
-
-  function destroy() {
-    cancelAnimationFrame(frameId);
-    window.removeEventListener('mousedown', handleStart);
-    if (config.doubleClickReset) element.removeEventListener('dblclick', handleDblClick);
-  }
-
-  element.addEventListener('mousedown', handleStart);
-  element.classList.add('live-number');
-  if (config.doubleClickReset) element.addEventListener('dblclick', handleDblClick);
-  set(config.inital);
-  var ob = {
-    listen: listen,
-    set: set,
-    destroy: destroy
-  };
-  return ob;
-}
-},{"./math-util.js":"../math-util.js"}],"../node_modules/parcel/src/builtins/bundle-url.js":[function(require,module,exports) {
+})({"../node_modules/parcel/src/builtins/bundle-url.js":[function(require,module,exports) {
 var bundleURL = null;
 
 function getBundleURLCached() {
@@ -315,7 +184,380 @@ function reloadCSS() {
 }
 
 module.exports = reloadCSS;
-},{"./bundle-url":"../node_modules/parcel/src/builtins/bundle-url.js"}],"test.css":[function(require,module,exports) {
+},{"./bundle-url":"../node_modules/parcel/src/builtins/bundle-url.js"}],"../src/live-styles.css":[function(require,module,exports) {
+var reloadCSS = require('_css_loader');
+
+module.hot.dispose(reloadCSS);
+module.hot.accept(reloadCSS);
+},{"_css_loader":"../node_modules/parcel/src/builtins/css-loader.js"}],"../src/util.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.clamp = clamp;
+exports.distance = distance;
+exports.cancelEvent = cancelEvent;
+exports.smoothstep = smoothstep;
+exports.smoothBetween = smoothBetween;
+exports.getPositionOnAxis = exports.getBounds = exports.getWindowSize = void 0;
+
+// force number between two values
+function clamp(val, min, max) {
+  return Math.max(min, Math.min(val, max));
+}
+
+function distance(x, y) {
+  return Math.abs(x - y);
+}
+
+function cancelEvent(ev) {
+  ev.preventDefault();
+  ev.stopPropagation();
+} // from https://thebookofshaders.com/glossary/?search=smoothstep
+
+
+function smoothstep(x, min, max) {
+  var t = clamp(distance(x, min) / distance(max, min), 0.0, 1.0);
+  return t * t * (3.0 - 2.0 * t);
+}
+
+function smoothBetween(val, _ref) {
+  var min = _ref.min,
+      max = _ref.max;
+  return clamp(min + distance(max, min) * val, min, max);
+}
+
+var getWindowSize = function getWindowSize(isX) {
+  return isX ? window.innerWidth : window.innerHeight;
+};
+
+exports.getWindowSize = getWindowSize;
+
+var getBounds = function getBounds(isX, el) {
+  if (el instanceof Window) {
+    return {
+      min: 0,
+      max: getWindowSize()
+    };
+  } else {
+    var rect = el.getBoundingClientRect();
+    var min = isX ? rect.left : rect.top;
+    var max = isX ? min + rect.width : min + rect.height;
+    return {
+      min: min,
+      max: el.clientWidth
+    };
+  }
+};
+
+exports.getBounds = getBounds;
+
+var getPositionOnAxis = function getPositionOnAxis(isX, o) {
+  return isX ? o.clientX : o.clientY;
+};
+
+exports.getPositionOnAxis = getPositionOnAxis;
+},{}],"../src/store.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.makeStore = makeStore;
+
+var _util = require("./util");
+
+var errMessage = "\nmust provide a config object, with range to makeStore!\nExample: makeStore({ range: { min: 0, max: 10 } })";
+
+function makeStore(config) {
+  var hasPrev = false;
+  var prev = null;
+  if (!config || !config.range || !config.range.min || !config.range.max) throw new Error(errMessage);
+  var frameId = null;
+  var listeners = [];
+
+  function set(x) {
+    if (frameId !== null) cancelAnimationFrame(frameId);
+    if (listeners.length === 0) return;
+    if (hasPrev && x == prev) return;
+    x = (0, _util.clamp)(x, config.range.min, config.range.max);
+    frameId = requestAnimationFrame(function () {
+      frameId = null;
+      listeners.forEach(function (l) {
+        return config.map ? l(config.map(x)) : l(x);
+      });
+    });
+  }
+
+  function listen(f) {
+    listeners.push(f);
+    return function () {
+      listeners = listeners.filter(function (x) {
+        return x !== f;
+      });
+    };
+  }
+
+  var destroy = function destroy() {
+    return cancelAnimationFrame(frameId);
+  };
+
+  if (!config.start) config.start = config.range.min;
+  return {
+    set: set,
+    listen: listen,
+    range: config.range,
+    start: config.start,
+    destroy: destroy
+  };
+}
+},{"./util":"../src/util.js"}],"../src/live-drag.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.makeDraggable = makeDraggable;
+
+var _util = require("./util.js");
+
+function makeDraggable(element, store, config) {
+  if (!config.axis) config.axis = 'y';
+
+  var isX = function isX() {
+    return 'x' === config.axis;
+  };
+
+  function handleStart(ev) {
+    (0, _util.cancelEvent)(ev);
+
+    function handleMove(ev) {
+      (0, _util.cancelEvent)(ev);
+      var pos = (0, _util.getPositionOnAxis)(isX(), ev);
+      var zeroPos = (0, _util.getBounds)(isX(), element).min;
+      var maxPos = (0, _util.getBounds)(isX(), config.container).max;
+      var val = (0, _util.smoothBetween)((pos - zeroPos) / maxPos, store.range);
+      store.set(val);
+    }
+
+    element.classList.add('live-active');
+    store.set(store.range.min);
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', function () {
+      window.removeEventListener("mousemove", handleMove);
+      element.classList.remove('live-active');
+    }, {
+      once: true
+    });
+    handleMove(ev);
+  }
+
+  function handleDblClick() {
+    store.set(store.start);
+  }
+
+  function destroy() {
+    element.removeEventListener('mousedown', handleStart);
+    if (config.doubleClickReset) element.removeEventListener('dblclick', handleDblClick);
+  }
+
+  element.addEventListener('mousedown', handleStart);
+  element.classList.add('live');
+  if (config.doubleClickReset) element.addEventListener('dblclick', handleDblClick);
+  return destroy;
+}
+},{"./util.js":"../src/util.js"}],"../src/drag-number.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.makeDraggableNumber = makeDraggableNumber;
+
+var _liveDrag = require("./live-drag");
+
+var defaultConfig = {
+  axis: 'y',
+  doubleClickReset: false,
+  changeFactor: 3
+};
+
+function makeDraggableNumber(element, store, config, render) {
+  var _config = Object.assign({}, defaultConfig);
+
+  config = Object.assign(_config, config);
+
+  var destroyDrag = function destroyDrag() {};
+
+  if (!config.disabled) destroyDrag = (0, _liveDrag.makeDraggable)(element, store, config, render);
+  var stopListening = store.listen(render);
+  store.set(store.start);
+  return function () {
+    destroyDrag();
+    stopListening();
+  };
+}
+},{"./live-drag":"../src/live-drag.js"}],"../src/slider.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.sliderPercent = sliderPercent;
+exports.slider = slider;
+exports.createSlider = createSlider;
+
+var _dragNumber = require("./drag-number");
+
+var _util = require("./util");
+
+function sliderPercent(v, store) {
+  return (0, _util.distance)(v, store.range.min) / (0, _util.distance)(store.range.min, store.range.max);
+}
+
+function slider(element, store, config) {
+  var _createSlider = createSlider(),
+      container = _createSlider.container,
+      setWidth = _createSlider.setWidth;
+
+  element.classList.add('_live_group'); // add clearfix hack
+
+  element.appendChild(container);
+  config.container = element;
+  var destroy = (0, _dragNumber.makeDraggableNumber)(element, store, config, function (v) {
+    if (config.format) v = config.format(v);
+    var amount = sliderPercent(v, store);
+    setWidth(amount);
+  });
+  return function () {
+    destroy();
+    element.removeChild(container);
+  };
+}
+
+function createSlider() {
+  var container = document.createElement('div');
+  container.classList.add('live-slider');
+  Object.assign(container.style, {
+    position: "relative",
+    display: "inline-block",
+    width: "100%",
+    minHeight: "10px"
+  });
+  var background = document.createElement("span");
+  background.classList.add('live-slider-background');
+  Object.assign(background.style, {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#DDD",
+    left: "0",
+    top: "0"
+  });
+  var fill = document.createElement("span");
+  fill.classList.add('live-slider-fill');
+  Object.assign(fill.style, {
+    height: "100%",
+    backgroundColor: "blue",
+    float: "left" // don't use left, or top, properties here
+    // we need relative positioning
+
+  });
+  background.appendChild(fill);
+  container.appendChild(background);
+  return {
+    container: container,
+    setWidth: function setWidth(x) {
+      fill.style.width = x * 100 + "%";
+    }
+  };
+}
+},{"./drag-number":"../src/drag-number.js","./util":"../src/util.js"}],"../src/number.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.number = number;
+
+var _dragNumber = require("./drag-number");
+
+var _slider = require("./slider");
+
+var _util = require("./util");
+
+function number(element, store, config) {
+  element.classList.add('live-number');
+  config.container = window;
+
+  function popupSlider() {}
+
+  element.addEventListener('mousedown', function (ev) {
+    var slider = (0, _slider.createSlider)();
+    var rect = element.getBoundingClientRect();
+    var sliderBounds = slider.container.getBoundingClientRect();
+    Object.assign(slider.container.style, {
+      position: 'absolute',
+      top: rect.top + rect.height + 5 + "px",
+      left: rect.left - 50 + "px",
+      width: "100px" // make dynamic
+
+    });
+    document.body.appendChild(slider.container);
+    var destroy = store.listen(function (x) {
+      slider.setWidth((0, _slider.sliderPercent)(x, store));
+    });
+    window.addEventListener('mouseup', function () {
+      document.body.removeChild(slider.container);
+    }, {
+      once: true
+    });
+  });
+  var destroyNumber = (0, _dragNumber.makeDraggableNumber)(element, store, config, function (v) {
+    if (config.format) v = config.format(v);
+    element.textContent = v;
+  });
+  return function () {
+    destroyNumber();
+  };
+}
+},{"./drag-number":"../src/drag-number.js","./slider":"../src/slider.js","./util":"../src/util.js"}],"../index.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.text = text;
+Object.defineProperty(exports, "makeStore", {
+  enumerable: true,
+  get: function () {
+    return _store.makeStore;
+  }
+});
+Object.defineProperty(exports, "number", {
+  enumerable: true,
+  get: function () {
+    return _number.number;
+  }
+});
+Object.defineProperty(exports, "slider", {
+  enumerable: true,
+  get: function () {
+    return _slider.slider;
+  }
+});
+
+require("./src/live-styles.css");
+
+var _store = require("./src/store");
+
+var _number = require("./src/number");
+
+var _slider = require("./src/slider");
+
+function text(element) {}
+},{"./src/live-styles.css":"../src/live-styles.css","./src/store":"../src/store.js","./src/number":"../src/number.js","./src/slider":"../src/slider.js"}],"test.css":[function(require,module,exports) {
 var reloadCSS = require('_css_loader');
 
 module.hot.dispose(reloadCSS);
@@ -323,7 +565,7 @@ module.hot.accept(reloadCSS);
 },{"_css_loader":"../node_modules/parcel/src/builtins/css-loader.js"}],"test.js":[function(require,module,exports) {
 "use strict";
 
-var live = _interopRequireWildcard(require("../index.js"));
+var live = _interopRequireWildcard(require("../index"));
 
 require("./test.css");
 
@@ -335,21 +577,40 @@ var $ = function $() {
   return (_document = document).querySelector.apply(_document, arguments);
 };
 
-var firstOut = $("#first-number-out");
-var first = live.number($("#first-number"), {
+var store = live.makeStore({
   range: {
-    min: -100,
-    max: 100
+    min: 1,
+    max: 10
   },
-  inital: 0
+  start: 5,
+  map: function map(n) {
+    return Math.floor(n);
+  }
 });
-first.listen(function (n) {
-  return firstOut.textContent = n.toString();
+var firstOut = $("#first-number-out");
+var destroyNumber = live.number($("#first-number"), store, {
+  name: 'number',
+  axis: 'x',
+  changeFactor: 5,
+  format: function format(n) {
+    return n == 0 ? "zero" : Math.floor(n);
+  }
+});
+var destroySlider = live.slider($("#slider"), store, {
+  name: 'slider',
+  axis: 'x',
+  changeFactor: 2,
+  doubleClickReset: true // format: (n) => Math.floor(n)
+
+}); // first.listen(n => firstOut.textContent = n <= 0 ? "n <= 0" : "n > 0")
+
+store.listen(function (n) {
+  return firstOut.textContent = n;
 });
 $("#reset-button").addEventListener("click", function () {
-  return first.set(0);
+  return store.set(store.start);
 });
-},{"../index.js":"../index.js","./test.css":"test.css"}],"../node_modules/parcel/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"../index":"../index.js","./test.css":"test.css"}],"../node_modules/parcel/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -377,7 +638,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62485" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63530" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

@@ -2,12 +2,14 @@
     text-underline-position: below;
     text-decoration: underline;
     transition: color 400ms;
+    text-decoration-style: dashed;
+    color: rgb(25, 116, 208);
 }
 
 .live-number:hover {
-    color: rgb(0, 97, 194);
+    color: rgb(48, 140, 232);
 }
 
-.live-number-active {
-    color: rgb(0, 128, 255);
+.live-number.live-active {
+    color: rgb(62, 159, 255);
 }

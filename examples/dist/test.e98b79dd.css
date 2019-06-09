@@ -1,15 +1,30 @@
+/* modern-clearfix from https://css-tricks.com/snippets/css/clear-fix/ */
+._live_group:before,
+._live_group:after {
+  content: "";
+  display: table;
+} 
+._live_group:after {
+  clear: both;
+}
+._live_group {
+  zoom: 1; /* For IE 6/7 (trigger hasLayout) */
+}
 .live-number {
     text-underline-position: below;
     text-decoration: underline;
     transition: color 400ms;
+    text-decoration-style: dashed;
+    color: rgb(25, 116, 208);
 }
 
 .live-number:hover {
-    color: rgb(0, 97, 194);
+    color: rgb(48, 140, 232);
 }
 
-.live-number-active {
-    color: rgb(0, 128, 255);
+.live-number.live-active {
+    color: rgb(62, 159, 255);
 }
+
 
 /*# sourceMappingURL=/test.e98b79dd.css.map */

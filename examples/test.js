@@ -1,14 +1,30 @@
-import * as live from '../index.js';
+import * as live from '../index';
 import './test.css';
 
 let $ = (...args) => document.querySelector(...args)
+
+let store = live.makeStore({
+    range: { min: 1, max: 10 },
+    start: 5,
+    map: (n) => Math.floor(n)
+})
+
 let firstOut = $("#first-number-out");
 
-let first = live.number($("#first-number"), {
-    range: { min: -100, max: 100 },
-    inital: 0
+let destroyNumber = live.number($("#first-number"), store, {
+    name: 'number',
+    axis: 'x',
+    changeFactor: 5,
+    format: (n) => n==0?"zero":Math.floor(n)
 });
 
-first.listen(n => firstOut.textContent = n.toString())
-
-$("#reset-button").addEventListener("click", () => first.set(0));
+let destroySlider = live.slider($("#slider"), store, {
+    name: 'slider',
+    axis: 'x',
+    changeFactor: 2,
+    doubleClickReset: true
+    // format: (n) => Math.floor(n)
+})
+// first.listen(n => firstOut.textContent = n <= 0 ? "n <= 0" : "n > 0")
+store.listen(n => firstOut.textContent = n)
+$("#reset-button").addEventListener("click", () => store.set(store.start));

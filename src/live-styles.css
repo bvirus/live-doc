@@ -1,0 +1,12 @@
+/* modern-clearfix from https://css-tricks.com/snippets/css/clear-fix/ */
+._live_group:before,
+._live_group:after {
+  content: "";
+  display: table;
+} 
+._live_group:after {
+  clear: both;
+}
+._live_group {
+  zoom: 1; /* For IE 6/7 (trigger hasLayout) */
+}
