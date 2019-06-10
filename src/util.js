@@ -27,7 +27,7 @@ export const getWindowSize = (isX) =>
 
 export const getBounds = (isX, el) => {
     if (el instanceof Window) {
-        return { min: 0, max: getWindowSize() }
+        return { min: getWindowSize()/3, max: 2*getWindowSize()/3 }
     } else {
         const rect = el.getBoundingClientRect();
         let min = isX ? rect.left : rect.top;
@@ -37,3 +37,12 @@ export const getBounds = (isX, el) => {
 }
 
 export const getPositionOnAxis = (isX, o) => isX ? o.clientX : o.clientY;
+
+export function on(element, event, cb) {
+    element.addEventListener(event, cb);
+    return () => element.removeEventListener(event, cb);
+}
+
+export function once(element, event, cb) {
+    element.addEventListener(event, cb, { once: true });
+}

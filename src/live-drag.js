@@ -1,49 +1,52 @@
-import { smoothBetween, cancelEvent, getPositionOnAxis, getBounds } from './util.js'
+import { cancelEvent, getPositionOnAxis, getBounds } from './util.js'
 
-export function makeDraggable(element, store, config) {
+export function makeDraggable(element, config) {
     if (!config.axis) config.axis = 'y';
+    if (!config.handleStart || !config.handleMove)
+        throw new Error("makeDraggable requires a handleMove and a handleClick function") 
+
     let isX = () => ('x' === config.axis);
 
     function handleStart(ev) {
         cancelEvent(ev);
+        let stop = config.handleStart();
 
         function handleMove(ev) {
             cancelEvent(ev);
             let pos = getPositionOnAxis(isX(), ev)
             let zeroPos = getBounds(isX(), element).min
             let maxPos = getBounds(isX(), config.container).max
-            let val = smoothBetween((pos-zeroPos)/maxPos, store.range);
-            store.set(val);
+            config.handleMove((pos-zeroPos)/maxPos)
         }
 
         element.classList.add('live-active')
-        store.set(store.range.min)
         
         window.addEventListener('mousemove', handleMove);
         window.addEventListener('mouseup', () => {
             window.removeEventListener("mousemove", handleMove);
             element.classList.remove('live-active');
+            if (stop) stop();
         }, { once: true });
 
         handleMove(ev);
     }
 
     function handleDblClick() {
-        store.set(store.start)
+        config.handleDblClick();
     }
 
-    function remove() {
+    function disable() {
         element.removeEventListener('mousedown', handleStart);
-        if (config.doubleClickReset)
+        if (config.handleDblClick)
             element.removeEventListener('dblclick', handleDblClick);
     }
-    
-    function attach(element) {
+
+    function enable() {
         element.addEventListener('mousedown', handleStart);
         element.classList.add('live')
-        if (config.doubleClickReset)
+        if (config.handleDblClick)
             element.addEventListener('dblclick', handleDblClick)
     }
 
-    return { remove, attach };
+    return { enable, disable };
 }

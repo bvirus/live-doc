@@ -6,10 +6,14 @@ const errMessage = `
 must provide a config object, with range to makeStore!
 Example: makeStore({ range: { min: 0, max: 10 } })`;
 
-export function makeStore(config) {
+function missing(object, key) {
+    return object === undefined || object === null || !object.hasOwnProperty(key)
+}
+
+export function createStore(config) {
     let hasPrev = false;
     let prev = null;
-    if (!config || !config.range || !config.range.min || !config.range.max) 
+    if (missing(config, 'range') || missing(config.range, 'min') || missing(config.range, 'max')) 
         throw new Error(errMessage);
 
     let frameId = null;
