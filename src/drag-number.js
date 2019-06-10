@@ -6,19 +6,25 @@ let defaultConfig = {
     changeFactor: 3
 }
 
-export function makeDraggableNumber(element, store, config, render) {
+export function makeDraggableNumber(store, config, render) {
     let _config = Object.assign({}, defaultConfig);
     config = Object.assign(_config, config);
-
-    let destroyDrag = () => {};
-    if (!config.disabled) 
-        destroyDrag = makeDraggable(element, store, config, render);
     
-    let stopListening = store.listen(render);
-    store.set(store.start);
+    let drag = null;
+    let stopListening = null;
 
-    return () => {
-        destroyDrag();
-        stopListening();
-    };
+    return {
+        remove() {
+            if (drag) drag.remove();
+            if (stopListening) stopListening();
+        },
+        attach() {
+            if (!config.disabled) 
+            drag = makeDraggable(store, config);
+        
+            drag.attach(element);
+            stopListening = store.listen(render);
+            store.set(store.start);
+        }
+    }   
 }

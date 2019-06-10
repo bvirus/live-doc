@@ -11,14 +11,15 @@ export function slider(element, store, config) {
     element.appendChild(container)
     config.container = element;
 
-    let destroy = makeDraggableNumber(element, store, config, (v) => {
+    let n = makeDraggableNumber(store, config, (v) => {
         if (config.format) v = config.format(v)
         let amount = sliderPercent(v, store)
         setWidth(amount)
-    })
+    });
+    n.attach(element);
 
     return () => {
-        destroy();
+        n.remove();
         element.removeChild(container);
     }
 }

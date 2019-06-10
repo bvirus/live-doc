@@ -1,4 +1,6 @@
 import { clamp } from './util';
+import { number } from './number';
+import { slider } from './slider';
 
 const errMessage = `
 must provide a config object, with range to makeStore!
@@ -33,5 +35,12 @@ export function makeStore(config) {
 
     let destroy = () => cancelAnimationFrame(frameId);
     if (!config.start) config.start = config.range.min
-    return { set, listen, range: config.range, start: config.start, destroy }
+
+    return {
+        set,
+        listen, 
+        range: config.range, 
+        start: config.start, 
+        destroy
+    }
 }

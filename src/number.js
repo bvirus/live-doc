@@ -5,9 +5,7 @@ import { getBounds } from './util';
 export function number(element, store, config) {
     element.classList.add('live-number');
     config.container = window;
-    function popupSlider() {
 
-    }
     element.addEventListener('mousedown', (ev) => {
         let slider = createSlider();
         let rect = element.getBoundingClientRect()
@@ -26,12 +24,10 @@ export function number(element, store, config) {
             document.body.removeChild(slider.container);
         }, { once: true })
     });
-    let destroyNumber = makeDraggableNumber(element, store, config, (v) => {
+    let n = makeDraggableNumber(store, config, (v) => {
         if (config.format) v = config.format(v);
         element.textContent = v;
-    })
-    return () => {
-        destroyNumber();
-
-    }
+    });
+    n.attach(element);
+    return () => { n.remove(); }
 }

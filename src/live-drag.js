@@ -32,16 +32,18 @@ export function makeDraggable(element, store, config) {
         store.set(store.start)
     }
 
-    function destroy() {
+    function remove() {
         element.removeEventListener('mousedown', handleStart);
         if (config.doubleClickReset)
             element.removeEventListener('dblclick', handleDblClick);
     }
     
-    element.addEventListener('mousedown', handleStart);
-    element.classList.add('live')
-    if (config.doubleClickReset)
-        element.addEventListener('dblclick', handleDblClick)
+    function attach(element) {
+        element.addEventListener('mousedown', handleStart);
+        element.classList.add('live')
+        if (config.doubleClickReset)
+            element.addEventListener('dblclick', handleDblClick)
+    }
 
-    return destroy;
+    return { remove, attach };
 }
