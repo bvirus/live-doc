@@ -7,6 +7,3 @@ export { slider } from './src/slider';
 export function text(element) {
 
 }
-
-
-
