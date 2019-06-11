@@ -27,9 +27,11 @@ export function slider(element) {
     }
 }
 
-export function createSlider(axis) {
+export function createSlider(axis = 'x') {
     let container = document.createElement('div');
     container.classList.add('live-slider')
+    let primaryDimension = (axis === 'x')?'width':'height';
+    let secondaryDimension = (axis === 'x')?'height':'width';
     Object.assign(container.style, {
         position: "relative",
         display: "inline-block",
@@ -50,10 +52,14 @@ export function createSlider(axis) {
 
     let fill = document.createElement("span");
     fill.classList.add('live-slider-fill')
+    let primaryPosition = (axis==='x')?"left":"top";
+    let secondaryPosition = (axis==='x')?"top":"left";
     Object.assign(fill.style, {
-        height: "100%",
-        float: "left"   // don't use left, or top, properties here
-                        // we need relative positioning
+        position: 'absolute',
+        [secondaryDimension]: "100%",
+        [primaryPosition]: 0,
+        [secondaryPosition]: 0    // don't use left, or top, properties here
+                                            // we need relative positioning
     })
     
     background.appendChild(fill)
@@ -62,27 +68,44 @@ export function createSlider(axis) {
     function displayNear(element) {
         let rect = element.getBoundingClientRect();
         // let top = Math.max(getWindowSize(axis === 'x').min, rect.top + rect.height + 5)
+        let b1 = 'top', b2 = 'left', d1 = 'width', d2='height';
+        if (axis === 'y') d1='height', d2='width';
+        let topOffset, leftOffset;
+        if (axis === 'x') {
+            topOffset = rect.height + 5;
+            leftOffset = rect.width/2 - (50)
+        } else if (axis == 'y') {
+            topOffset = rect.height/2 - 50
+            leftOffset = rect.width + 20;
+        }
         Object.assign(container.style, {
             position: 'absolute',
-            top: rect.top + rect.height + 5 + "px",
-            left: (rect.left + rect.width/2 - (50)) + "px",
-            width: "100px" // make dynamic
+            top: rect.top + rect.height + topOffset + "px",
+            left: (rect.left + leftOffset) + "px",
+            minWidth: "0px",
+            minHeight: "0px",
+            [primaryDimension]: "80px", // make dynamic
+            [secondaryDimension]: "10px"
         });
     }
     function setWidth(x) {
-        fill.style.width = (x*100 + "%")
+        let primarySize = container['client' + primaryDimension[0].toUpperCase() + primaryDimension.slice(1)]
+        fill.style[primaryDimension] = (x*100 + "%")
+        let secondarySize = container['client' + secondaryDimension[0].toUpperCase() + secondaryDimension.slice(1)]
+        fill.style[secondaryDimension] = secondarySize + "px"
     }
     return { container, setWidth, displayNear };
 }
 
 
-export function createPopupSlider() {
-    let slider = createSlider();
+export function createPopupSlider(element, axis) {
+    let slider = createSlider(axis);
 
     return (event) => {
         switch(event.type) {
             case 'start':
                 slider.displayNear(event.event.target);
+
                 document.body.appendChild(slider.container);
                 break;
             case 'stop':

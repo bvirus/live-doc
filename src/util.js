@@ -18,6 +18,10 @@ export function smoothstep(x, min, max) {
     return t * t * (3.0 - 2.0 * t);
 }
 
+export function percentToRange(val, min, max) {
+    return min + distance(max,min)*val
+}
+
 export function smoothBetween(val, { min, max }) {
     return clamp(min + distance(max,min)*val, min, max)
 }
