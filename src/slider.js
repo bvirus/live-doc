@@ -5,33 +5,25 @@ export function sliderPercent(v, store) {
     return (distance(v, store.range.min)/distance(store.range.min, store.range.max))
 }
 
-export function slider(element, store, config) {
-    let { container, setWidth } = createSlider();
-    element.classList.add('_live_group'); // add clearfix hack
-    element.appendChild(container)
+export function slider(element) {
+    let slider = createSlider();
 
-    let drag = makeDraggable(element, {
-        handleMove(val) {
-            store.set(smoothBetween(val, store.range));
-        },
-        handleStart() {
-            store.set(store.range.min);
-        },
-        axis: config.axis,
-        container: element
-    });
-    drag.enable();
+
+    let drag = makeDraggable(element,'x', element);
     
-    store.listen((v) => {
-        if (config.format) v = config.format(v)
-        let amount = sliderPercent(v, store)
-        setWidth(amount)
-    });
-    store.set(store.start);
-
-    return () => {
-        drag.disable();
-        element.removeChild(container);
+    return { 
+        disable: () => {
+            drag.disable();
+            element.classList.remove('_live_group');
+            element.removeChild(slider.container);
+        },
+        enable: () => {
+            drag.enable();
+            element.classList.add('_live_group'); // add clearfix hack
+            element.appendChild(slider.container)
+        },
+        listen: (l) => drag.listen(l),
+        setWidth: (w) => slider.setWidth(w)
     }
 }
 
@@ -82,3 +74,41 @@ export function createSlider(axis) {
     }
     return { container, setWidth, displayNear };
 }
+
+
+export function createPopupSlider() {
+    let slider = createSlider();
+
+    return (event) => {
+        switch(event.type) {
+            case 'start':
+                slider.displayNear(event.event.target);
+                document.body.appendChild(slider.container);
+                break;
+            case 'stop':
+                document.body.removeChild(slider.container);
+                break;
+            case 'value':
+                slider.setWidth(event.value);
+                break;
+        }
+    }
+}
+
+// export function createPopupSlider(element) {
+//     let slider = createSlider();
+//     function mousedown(ev) {
+//         slider.displayNear(ev.target);
+//         document.body.appendChild(slider.container);
+
+//         window.addEventListener('mouseup', () => {
+//             document.body.removeChild(slider.container);
+//         }, { once: true });
+//     }
+
+//     return {
+//         enable: () => element.addEventListener('mousedown', mousedown),
+//         disable: () => element.removeEventListener('mousedown', mousedown),
+//         setWidth: (w) => slider.setWidth(w)
+//     }
+// }

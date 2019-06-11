@@ -37,7 +37,7 @@ export function createStore(config) {
         return () => { listeners = listeners.filter(x => x !== f) }
     }
 
-    let destroy = () => cancelAnimationFrame(frameId);
+    let destroy = () => { if (frameId) cancelAnimationFrame(frameId) }
     if (!config.start) config.start = config.range.min
 
     return {
