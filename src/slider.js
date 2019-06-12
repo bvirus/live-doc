@@ -23,7 +23,8 @@ export function slider(element) {
             element.appendChild(slider.container)
         },
         listen: (l) => drag.listen(l),
-        setWidth: (w) => slider.setWidth(w)
+        setWidth: (w) => slider.setWidth(w),
+        container: slider.container
     }
 }
 
@@ -94,7 +95,7 @@ export function createSlider(axis = 'x') {
         let secondarySize = container['client' + secondaryDimension[0].toUpperCase() + secondaryDimension.slice(1)]
         fill.style[secondaryDimension] = secondarySize + "px"
     }
-    return { container, setWidth, displayNear };
+    return { container, setWidth, displayNear, container };
 }
 
 
