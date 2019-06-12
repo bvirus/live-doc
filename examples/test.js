@@ -13,15 +13,15 @@ let store = live.createStore({
 let firstOut = $("#first-number-out");
 let first = $("#first-number");
 let drag = live.makeDraggable(first);
-let popup = live.createPopupSlider(first);
-drag.use(popup)
+// let popup = live.createPopupSlider(first);
+// drag.use(popup)
 drag.listen(v => first.textContent = Math.floor(55*v + 3) );
 first.textContent = "3";
 drag.enable();
 
 let s = live.slider($("#slider"))
 function setWidth(w) {
-    s.setWidth(w)
+    s.set(w)
 }
 s.listen(setWidth);
 drag.listen(setWidth)

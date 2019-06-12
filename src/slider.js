@@ -23,7 +23,7 @@ export function slider(element) {
             element.appendChild(slider.container)
         },
         listen: (l) => drag.listen(l),
-        setWidth: (w) => slider.setWidth(w),
+        set: (w) => slider.set(w),
         container: slider.container
     }
 }
@@ -59,8 +59,7 @@ export function createSlider(axis = 'x') {
         position: 'absolute',
         [secondaryDimension]: "100%",
         [primaryPosition]: 0,
-        [secondaryPosition]: 0    // don't use left, or top, properties here
-                                            // we need relative positioning
+        [secondaryPosition]: 0
     })
     
     background.appendChild(fill)
@@ -89,13 +88,13 @@ export function createSlider(axis = 'x') {
             [secondaryDimension]: "10px"
         });
     }
-    function setWidth(x) {
+    function set(x) {
         let primarySize = container['client' + primaryDimension[0].toUpperCase() + primaryDimension.slice(1)]
         fill.style[primaryDimension] = (x*100 + "%")
         let secondarySize = container['client' + secondaryDimension[0].toUpperCase() + secondaryDimension.slice(1)]
         fill.style[secondaryDimension] = secondarySize + "px"
     }
-    return { container, setWidth, displayNear, container };
+    return { container, set, displayNear, container };
 }
 
 
@@ -113,7 +112,7 @@ export function createPopupSlider(element, axis) {
                 document.body.removeChild(slider.container);
                 break;
             case 'value':
-                slider.setWidth(event.value);
+                slider.set(event.value);
                 break;
         }
     }
