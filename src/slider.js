@@ -23,6 +23,7 @@ export function slider(element) {
             element.appendChild(slider.container)
         },
         listen: (l) => drag.listen(l),
+        use: (u) => drag.use(u),
         setRange: (x,y) => slider.setRange(x,y),
         setFill: (x) => slider.setFill(x),
         container: slider.container
