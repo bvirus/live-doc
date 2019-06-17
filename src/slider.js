@@ -23,43 +23,96 @@ export function slider(element) {
             element.appendChild(slider.container)
         },
         listen: (l) => drag.listen(l),
-        set: (w) => slider.set(w),
+        setRange: (x,y) => slider.setRange(x,y),
+        setFill: (x) => slider.setFill(x),
         container: slider.container
     }
+}
+
+let dimensions = {
+  x: {
+    primary: {
+      position: {
+        start: 'left',
+        end: 'right'
+      },
+      dimension: 'width'
+    },
+    secondary: {
+      position: {
+        start: 'top', 
+        end: 'bottom'
+      },
+      dimension: 'height'
+    }
+  },
+  y: {
+    primary: {
+      position: {
+        start: 'top', 
+        end: 'bottom',
+      },
+      dimension: 'height'
+    },
+    secondary: {
+      position: {
+        start: 'left', 
+        end: 'right'
+      },
+      dimension: 'width'
+    }
+  }
+}
+
+export function createBoundary(element, axis = 'x') {
+  let dim = dimensions[axis];
+  
+  function makeSetterAlong(along) {
+    return (x, y) => {
+      element.style[dim[along][0]] = x;
+      if (y !== undefined) element.style[dim[along][1]] = y;
+    }
+  }
+  
+  return { 
+    setPrimary: makeSetterAlong('primary'), 
+    setSecondary: makeSetterAlong('secondary')
+  }
 }
 
 export function createSlider(axis = 'x') {
     let container = document.createElement('div');
     container.classList.add('live-slider')
-    let primaryDimension = (axis === 'x')?'width':'height';
-    let secondaryDimension = (axis === 'x')?'height':'width';
+    let { primary, secondary } = dimensions[axis]
+    
     Object.assign(container.style, {
         position: "relative",
         display: "inline-block",
-        width: "100%",
+        [primary.dimension]: "100%",
         minHeight: "10px"
     })
 
     let background = document.createElement("span");
-    
+    let backgroundBoundary = createBoundary(container, axis)
     background.classList.add('live-slider-background')
     Object.assign(background.style, {
         position: "absolute",
-        width: "100%",
-        height: "100%",
-        left: "0",
-        top: "0"
+        [primary.dimension]: "100%",
+        [secondary.dimension]: "100%",
     })
+    backgroundBoundary.setPrimary(0,0)
+    
 
     let fill = document.createElement("span");
+    let fillBoundary = createBoundary(container, axis)
     fill.classList.add('live-slider-fill')
     let primaryPosition = (axis==='x')?"left":"top";
     let secondaryPosition = (axis==='x')?"top":"left";
     Object.assign(fill.style, {
         position: 'absolute',
-        [secondaryDimension]: "100%",
-        [primaryPosition]: 0,
-        [secondaryPosition]: 0
+        [secondary.dimension]: "100%",
+        [primary.position.start]: 0,
+        [secondary.position.start]: 0
     })
     
     background.appendChild(fill)
@@ -88,13 +141,18 @@ export function createSlider(axis = 'x') {
             [secondaryDimension]: "10px"
         });
     }
-    function set(x) {
+    function setFill(x) {
         let primarySize = container['client' + primaryDimension[0].toUpperCase() + primaryDimension.slice(1)]
-        fill.style[primaryDimension] = (x*100 + "%")
+        fill.style[primary.position.end] = (x*100 + "%")
+        fill.style[primary.position.start] = "0%";
         let secondarySize = container['client' + secondaryDimension[0].toUpperCase() + secondaryDimension.slice(1)]
-        fill.style[secondaryDimension] = secondarySize + "px"
+        fill.style[secondary.dimension] = secondarySize + "px"
     }
-    return { container, set, displayNear, container };
+    function setRange(x,y) {
+        fill.style[primary.position.start] = x*100 + "%";    
+        fill.style[primary.position.end] = ((1-y)*100 + "%");
+    }
+    return { container, setFill, setRange, displayNear, container };
 }
 
 

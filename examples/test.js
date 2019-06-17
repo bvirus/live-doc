@@ -1,13 +1,6 @@
 import * as live from '../index';
 import '../default-theme.css'
-import { ErrorHandler } from '@angular/core';
 let $ = (...args) => document.querySelector(...args)
-
-let store = live.createStore({
-    range: { min: 1, max: 10 },
-    start: 5,
-    map: (n) => Math.floor(n)
-});
 
 
 let firstOut = $("#first-number-out");
@@ -21,7 +14,7 @@ drag.enable();
 
 let s = live.slider($("#slider"))
 function setWidth(w) {
-    s.set(w)
+    s.setRange(0.3, w);
 }
 s.listen(setWidth);
 drag.listen(setWidth)
@@ -50,7 +43,7 @@ s.enable();
 // })
 
 // first.listen(n => firstOut.textContent = n <= 0 ? "n <= 0" : "n > 0")
-store.listen(n => firstOut.textContent = n)
+// store.listen(n => firstOut.textContent = n)
 // $("#reset-button").addEventListener("click", () => store.set(store.start));
 
 // function sourceFromObservableSource(stream) {
