@@ -1,5 +1,6 @@
 import * as live from '../index';
 import '../default-theme.css'
+import './test.css';
 let $ = (...args) => document.querySelector(...args)
 
 
