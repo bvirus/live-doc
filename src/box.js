@@ -1,18 +1,20 @@
 
-export const box = (start, stop, handle) => [Object.freeze([start, stop, handle])]
+export const boxObject = ({ start, stop, handle }) => box(start, stop, handle)
+export const box = (start, stop, handle) => Object.freeze([start, stop, handle])
 export const start = (box, ...args) => box.forEach(f => (f[0]) ? f[0](...args) : null)
 export const stop = (box, ...args) => box.forEach(f => (f[1]) ? f[1](...args) : null)
 export const handle = (box, ...args) => box.forEach(f => f[2] ? f[2](...args) : null)
-export const compose = (...boxes) => boxes.reduce((prev, cur) => prev.concat(cur))
+
 export const enable     = start
 export const disable    = stop
 
 export const freezeBox = (box) => {
     return Object.freeze({
         enable: (...args) =>    enable(box, ...args),
-        disable : (...args) =>  disable(box, args),
-        start : (...args) =>    start(box,args),
-        stop: (...args) =>      stop(box, args)
+        disable : (...args) =>  disable(box, ...args),
+        start : (...args) =>    start(box, ...args),
+        stop: (...args) =>      stop(box, ...args),
+        handle: (...args) =>    handle(box, ...args)
     })
 }
 

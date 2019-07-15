@@ -1,4 +1,4 @@
-import { handle } from "./box";
+import { box, handle, freezeBox } from "./box";
 
 export function createSource() {
     let listeners = [];
@@ -7,16 +7,20 @@ export function createSource() {
     function provide(x) {
         prev = x;
         if (listeners.length === 0) return;
-        listeners.forEach(f => f(x))
+        handle(listeners, x)
     }
 
     function listen(f) {
-        listeners = listeners.concat(f)
+        listeners.push(box(null, null, f))
         let i = listeners.length - 1
         return () => { if (i < listeners.length) listeners.splice(i, 1) }
     }
 
-    let destroy = () => {}
+    function use({ start, stop, handle }) {
+        listeners.push(box(start, stop, handle))
+        let i = listeners.length - 1
+        return () => { if (i < listeners.length) listeners.splice(i, 1) }
+    }
 
-    return { listen, provide, destroy }
+    return { listen, provide, use, ...freezeBox(listeners) }
 }

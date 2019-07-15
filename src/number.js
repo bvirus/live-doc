@@ -1,6 +1,6 @@
 import { createSlider, sliderPercent } from './slider';
 import { smoothBetween, getWindowSize } from './util';
-import { makeDraggable } from './live-drag';
+import { makeDraggable } from './drag';
 // import { createStore } from './store';
 
 export function number(element, config) {
