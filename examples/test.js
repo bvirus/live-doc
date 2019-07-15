@@ -58,7 +58,7 @@ function makeGood(update) {
 // drag.listen(setWidth)
 s.start();
 s.listen((v) => {
-  update(v)
+  update(...v)
   console.log(v)
 })
 

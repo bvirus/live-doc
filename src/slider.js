@@ -49,7 +49,7 @@ export function rangeSlider(element, store = [0,0]) {
                 handle = 1
             }
         },
-        stop: ({ value }) => handle = source.stop([value, handle]),
+        stop: ({ value }) => source.stop([value, handle]),
         handle: ({ value }) => {
             if (handle === null) {
                 if (Math.abs(value - store[0]) > Math.abs(value - store[1])) handle = 1;
