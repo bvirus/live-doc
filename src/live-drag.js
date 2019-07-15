@@ -1,62 +1,55 @@
-import { cancelEvent, getPositionOnAxis, getBounds, clamp } from './util.js'
+import { cancelEvent, clamp } from './util.js'
 import { createSource } from './source.js';
+import { box, compose, start, handle, stop, withEvent, withClass, freezeBox } from './box';
+import { createOrientation } from './dimensions';
 
-export function makeDraggable(element, axis = "x", container = window) {
-    // if (!config.axis) config.axis = 'y';
-    // if (!config.handleStart || !config.handleMove)
-    //     throw new Error("makeDraggable requires a handleMove and a handleClick function") 
+export function useDraggable(element, axis = "x", container = window) {
+    let listeners = [];
+    const ori = createOrientation(axis)
+
+
+    function computeValue(ev) {
+        let pos = ori.getPositionOnAxis(ev)
+        let zeroPos = ori.getMin(element)
+        let maxPos = ori.getMax(container)
+        return { event: ev, value : clamp((pos - zeroPos) / maxPos, 0, 1) }
+    }
+
+    const dragging = compose(
+        box(cancelEvent, cancelEvent),
+        withClass(element, 'live-active'),
+        withEvent(window, 'mousemove', (ev) => {
+
+            handle(listeners, computeValue(ev))
+        }),
+        box(
+            (ev) => start(listeners, computeValue(ev)),
+            (ev) => stop(listeners, computeValue(ev))
+        )
+    )
     
-    let source = createSource();
-    let valueSource = createSource();
-    source.listen(e => {
-        if (e.type === 'value') valueSource.provide(e.value)
-    });
-
-    let isX = () => 'x' === axis;
-
-    function handleStart(ev) {
-        cancelEvent(ev);
-        // let stop = config.handleStart(ev);
-        source.provide({ type: 'start', event: ev });
-
-        function handleMove(ev) {
-            cancelEvent(ev);
-            let pos = getPositionOnAxis(isX(), ev)
-            let zeroPos = getBounds(isX(), element).min
-            let maxPos = getBounds(isX(), container).max
-            // config.handleMove((pos-zeroPos)/maxPos, ev)
-            source.provide({ type: 'value', value: clamp((pos-zeroPos)/maxPos, 0, 1), event: ev });
-        }
-
-        element.classList.add('live-active')
-        
-        window.addEventListener('mousemove', handleMove);
-        window.addEventListener('mouseup', (ev) => {
-            window.removeEventListener("mousemove", handleMove);
-            element.classList.remove('live-active');
-            source.provide({ type: 'stop', event: ev });
-        }, { once: true });
-
-        handleMove(ev);
+    function dragStart(ev) {
+        start(dragging, ev);
+        window.addEventListener('mouseup', (e) => stop(dragging, e), { once: true });
+        handle(listeners, computeValue(ev));
     }
 
-    function disable() {
-        element.removeEventListener('mousedown', handleStart);
-        // if (config.handleDblClick)
-        // element.removeEventListener('dblclick', handleDblClick);
-        // source.destroy();
-    }
+    return [
+        compose( 
+            withEvent(element, 'mousedown', dragStart), 
+            withClass(element, 'live')
+        ), 
+        (f) => { listeners = listeners.concat(box(null,null,f)) },
+        ({start, stop, handle}) => listeners = listeners.concat(box(start, stop, handle))
+    ]
+}
 
-    function enable() {
-        element.addEventListener('mousedown', handleStart);
-        element.classList.add('live')
-        // element.addEventListener('dblclick', handleDblClick)
-    }
+export function makeDraggable(element, axis = 'x', container = window) {
+    const [draggable, listen, use] = useDraggable(element, axis, container)
 
-    return { 
-        enable, 
-        disable, 
-        listen: (l) => valueSource.listen(l),
-        use: (l) => source.listen(l)
+    return {
+        listen: listen,
+        use: use,
+        ...freezeBox(draggable)
     }
 }

@@ -6,26 +6,17 @@ import { makeDraggable } from './live-drag';
 export function number(element, config) {
     element.classList.add('live-number');
     let slider = createSlider();
-
-    // let destroy = store.listen(x => {
-    //     slider.setWidth(sliderPercent(x, store))
-    // });
-    
     
     let drag = makeDraggable(element, {
         axis: config.axis,
         container: window
     });
-    drag.enable();
-
-
 
     store.set(store.start);
 
-    return { 
-        destroy() { drag.disable(); destroy(); }, 
+    return Object.assign({
         set: (v) => store.set(v), 
         listen: (cb) => store.listen(cb) 
-    }
+    }, drag);
 }
 

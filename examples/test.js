@@ -9,7 +9,7 @@ let first = $("#first-number");
 let second = $("#second-number");
 let dragOne = live.makeDraggable(first);
 let dragTwo = live.makeDraggable(second);
-let store = [0,0];
+let store = [0.1,0.5];
 let range = [0,1];
 function update(value, pos) {
   store[pos] = value;
@@ -34,25 +34,37 @@ function setWidth(w) {
     s.setRange(range[0], range[1]);
 }
 
-let handle = null;
-s.use(ev => {
-  switch (ev.type) {
-    case 'stop':
-      handle = null;
-      break;
-    case 'value':
-      if (handle === null) {
-        let halfway = 0
-        if (Math.abs(store[1] - store[0]) > 0.001) {
-          halfway = (range[1] - range[0])*0.5 + range[0]
+let command = false;
+window.addEventListener('keydown', (ev) => {
+  if (ev.keyCode === 224 || ev.keyCode === 17 || ev.keyCode === 16) command = true;
+});
+
+window.addEventListener('keyup', (ev) => command = false)
+
+
+function makeGood(s, update) {
+  let handle = null;
+  return s.use({
+      start: (ev) => handle = null,
+      stop : (ev) => {
+
+        if (command === true) {
+          update(ev.value, 0)
+          handle = 1
         }
-        if (ev.value > halfway) handle = 1;
+    },
+    handle : (ev) => {
+      if (handle === null) {
+        if (Math.abs(ev.value - store[0]) > Math.abs(ev.value - store[1])) handle = 1;
         else handle = 0
-      }
+      } else if (handle === 0 && store[1] < store[0]) handle = 1
+      else if (handle === 1 && store[0] > store[1]) handle=0
       update(ev.value, handle);
-      break;
-  }
-})
+    },
+  })
+}
+makeGood(s, (value, index) => update(value, index))
+window.s = s
 // s.listen(v => {
 //   let halfway = (range[1] - range[0])*0.5 + range[0]
 //   if (v > halfway) update(v, 1);
