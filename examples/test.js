@@ -31,7 +31,7 @@ dragOne.start();
 dragTwo.start();
 
 let s = live.rangeSlider($("#slider"), (ev) => {
-  store = ev.updateRange(store)
+  store = ev.nextRange(store)
   display(store)
 })
 

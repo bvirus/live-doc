@@ -26,7 +26,7 @@ export function rangeSlider(element, sendEvent) {
         ret[handle] = value
         return ret
     }
-    function updateRange(store, draw = false) {
+    function nextRange(store, draw = false) {
         switch (this.type) {
             case 'start':
                 if (command || draw) {
@@ -45,7 +45,7 @@ export function rangeSlider(element, sendEvent) {
     
     const sliderTraits = fromTraits([
         withDraggable((ev) => {
-            ev.updateRange = updateRange.bind(ev)
+            ev.nextRange = nextRange.bind(ev)
             sendEvent(ev)
         }, element, 'x', element),
         withEvent(window, 'keydown', (ev) => {
