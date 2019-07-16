@@ -45,14 +45,12 @@ export function rangeSlider(element, sendEvent) {
     
     const sliderTraits = fromTraits([
         withDraggable((ev) => {
+            command = ev.event.ctrlKey || ev.event.shiftKey || ev.event.metaKey || ev.event.button === 2
             ev.nextRange = nextRange.bind(ev)
             sendEvent(ev)
         }, element, 'x', element),
-        withEvent(window, 'keydown', (ev) => {
-            if (ev.keyCode === 224 || ev.keyCode === 17 || ev.keyCode === 16)
-                command = true;
-        }),
-        withEvent(window, 'keyup', () => command = false),
+        withEvent(window, 'mouseup', () => command = false),
+        withEvent(element, 'contextmenu', (ev) => ev.preventDefault()),
         withClass(element, '_live_group'), // add clearfix hack
         withChild(element, slider.container)
     ])
