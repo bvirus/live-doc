@@ -1,4 +1,4 @@
-import { distance, smoothBetween } from './util';
+import { cancelEvent } from './util';
 import { withDraggable } from './drag';
 import { dimensions } from './dimensions';
 import { withChild, withClass, fromTraits, withEvent } from './traits';
@@ -44,13 +44,18 @@ export function rangeSlider(element, sendEvent) {
     }
     
     const sliderTraits = fromTraits([
+        withEvent(element, 'mousedown', (ev) => {
+            command = ev.ctrlKey || ev.shiftKey || ev.metaKey || ev.button === 2
+            if (ev.button === 2 || ev.ctrlKey) 
+                window.addEventListener('contextmenu', cancelEvent, { once: true })
+        }),
         withDraggable((ev) => {
-            command = ev.event.ctrlKey || ev.event.shiftKey || ev.event.metaKey || ev.event.button === 2
             ev.nextRange = nextRange.bind(ev)
             sendEvent(ev)
         }, element, 'x', element),
-        withEvent(window, 'mouseup', () => command = false),
-        withEvent(element, 'contextmenu', (ev) => ev.preventDefault()),
+        withEvent(window, 'mouseup', (e) => {
+            command = false
+        }),
         withClass(element, '_live_group'), // add clearfix hack
         withChild(element, slider.container)
     ])

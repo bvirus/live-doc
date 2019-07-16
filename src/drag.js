@@ -6,7 +6,7 @@ export function withDraggable(sendEvent, element, axis = "x", container = window
     const ori = createOrientation(axis)
 
     function computeValue(ev) {
-        cancelEvent(ev)
+        
         let pos = ori.getPositionOnAxis(ev)
         let zeroPos = ori.getMin(element)
         let maxPos = ori.getMax(container)
@@ -14,20 +14,25 @@ export function withDraggable(sendEvent, element, axis = "x", container = window
     }
 
     const dragging = fromTraits([
-        trait(cancelEvent, cancelEvent),
         withClass(element, 'live-active'),
         withEvent(window, 'mousemove', (ev) => {
+            cancelEvent(ev)
             sendEvent({ type : 'move', ...computeValue(ev) })
         }),
         Object.freeze({
-            start: (ev) =>  sendEvent({ type : 'start', ...computeValue(ev) }),
-            stop: (ev) =>   sendEvent({ type: 'stop', ...computeValue(ev) })
+            start: (ev) => { cancelEvent(ev); sendEvent({ type : 'start', ...computeValue(ev) }) },
+            stop: (ev) =>  { cancelEvent(ev); sendEvent({ type: 'stop', ...computeValue(ev) }) }
         })
     ])
     
     function dragStart(ev) {
+        cancelEvent(ev);
         dragging.start(ev);
-        window.addEventListener('mouseup', (e) => dragging.stop(e), { once: true });
+        window.addEventListener('mouseup', (e) => { 
+            cancelEvent(e); 
+            dragging.stop(e);
+        }, { once: true });
+        
     }
 
     return fromTraits([
