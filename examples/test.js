@@ -30,9 +30,9 @@ let dragTwo = live.makeDraggable((
 dragOne.start();
 dragTwo.start();
 
-let s = live.rangeSlider($("#slider"), (ev) => {
+let s = live.rangeSlider((ev) => {
   store = ev.nextRange(store)
   display(store)
-})
+}, $("#slider"))
 
 s.start();

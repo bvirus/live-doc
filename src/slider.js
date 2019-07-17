@@ -3,7 +3,7 @@ import { withDraggable } from './drag';
 import { dimensions } from './dimensions';
 import { withChild, withClass, fromTraits, withEvent } from './traits';
 
-export function slider(element, sendEvent) {
+export function slider(sendEvent, element) {
     const slider = createSlider();
     return {
         ...fromTraits([
@@ -15,7 +15,7 @@ export function slider(element, sendEvent) {
     }
 }
 
-export function rangeSlider(element, sendEvent) {
+export function rangeSlider(sendEvent, element) {
     const slider = createSlider();
     let command = false;
     let handle = null
