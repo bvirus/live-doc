@@ -1,0 +1,27 @@
+var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+_parcelHelpers.defineInteropFlag(exports);
+_parcelHelpers.export(exports, "fromTraits", function () {
+  return fromTraits;
+});
+_parcelHelpers.export(exports, "withClass", function () {
+  return withClass;
+});
+_parcelHelpers.export(exports, "withChild", function () {
+  return withChild;
+});
+_parcelHelpers.export(exports, "withEvent", function () {
+  return withEvent;
+});
+const fromTraits = traits => (...args) => {
+  const cleans = traits.map(f => f(...args));
+  return () => cleans.reverse().map(f => f());
+};
+function withClass(element, className) {
+  return trait(() => element.classList.add(className), () => element.classList.remove(className));
+}
+function withChild(element, child) {
+  return trait(() => element.appendChild(child), () => element.removeChild(child));
+}
+function withEvent(element, event, handler) {
+  return trait(() => element.addEventListener(event, handler), () => element.removeEventListener(event, handler));
+}

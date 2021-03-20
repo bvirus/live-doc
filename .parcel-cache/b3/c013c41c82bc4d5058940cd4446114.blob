@@ -1,0 +1,60 @@
+var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+_parcelHelpers.defineInteropFlag(exports);
+_parcelHelpers.export(exports, "withDraggable", function () {
+  return withDraggable;
+});
+_parcelHelpers.export(exports, "makeDraggable", function () {
+  return makeDraggable;
+});
+var _utilJs = require('./util.js');
+var _traits = require('./traits');
+var _dimensions = require('./dimensions');
+function withDraggable(sendEvent, element, axis = "x", container = window) {
+  const ori = new _dimensions.Orientation(axis);
+  function computeValue(ev) {
+    console.log(ev);
+    let pos = ori.getPositionOnAxis(ev);
+    let zeroPos = ori.getMin(element);
+    let maxPos = ori.getMax(container);
+    return {
+      event: ev,
+      value: _utilJs.clamp((pos - zeroPos) / maxPos, 0, 1)
+    };
+  }
+  const sendMove = ev => {
+    _utilJs.cancelEvent(ev);
+    sendEvent({
+      type: 'move',
+      ...computeValue(ev)
+    });
+  };
+  const startDragging = _traits.fromTraits([_utilJs.cancelEvent, _traits.withClass(element, 'live-active'), _traits.withEvent(window, 'mousemove', sendMove), _traits.withEvent(window, 'touchmove', sendMove), ev => {
+    sendEvent({
+      type: 'start',
+      ...computeValue(ev)
+    });
+    return ev => {
+      alert(ev);
+      sendEvent({
+        type: 'stop',
+        ...computeValue(ev)
+      });
+    };
+  }]);
+  function dragStart(ev) {
+    const stop = startDragging(ev);
+    window.addEventListener('mouseup', stop, {
+      once: true
+    });
+    window.addEventListener('touchend', stop, {
+      once: true
+    });
+  }
+  return _traits.fromTraits([_traits.withEvent(element, 'mousedown', dragStart), _traits.withEvent(element, 'touchstart', dragStart), _traits.withAttribute(element, 'draggable', 'true'), _traits.withClass(element, 'live')]);
+}
+const makeDraggable = (...args) => {
+  const start = withDraggable(...args);
+  return {
+    start
+  };
+};

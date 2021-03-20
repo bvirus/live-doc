@@ -9,6 +9,6 @@
   "author": "James A. Eschrich",
   "license": "MIT",
   "devDependencies": {
-    "parcel": "^1.12.3"
+    "parcel": "^2.0.0-beta.2"
   }
 }

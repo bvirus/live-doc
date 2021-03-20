@@ -17,19 +17,20 @@ export const dimensions = {
   y: { primary: yAxis, secondary: xAxis }
 }
 
-export function createOrientation(axis) {
-  let { primary } = dimensions[axis]
-  return {
-    getPositionOnAxis: (o) => axis === 'x' ? o.clientX : o.clientY,
-    getMin: (el) => {
-      if (el instanceof Window) { return window[primary.inner] / 3; } 
-      else return el.getBoundingClientRect()[primary.position.start];
-    },
-    getMax: (el) => {
-      if (el instanceof Window) {
-        return 2 * window[primary.inner] / 3
-      } else return el[primary.client]
-      
-    }
+export class Orientation {
+  constructor(axis) {
+    this.axis = axis;
+    this.primary = dimensions[axis].primary;
+  }
+  getPositionOnAxis(ev) { return this.axis === 'x' ? ev.clientX : ev.clientY; }
+  getMin(el) {
+    if (el instanceof Window) { return window[this.primary.inner] / 3; } 
+    else return el.getBoundingClientRect()[this.primary.position.start];
+  }
+  getMax(el) {
+    if (el instanceof Window) {
+      return 2 * window[this.primary.inner] / 3
+    } else return el[this.primary.client]
+    
   }
 }

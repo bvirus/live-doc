@@ -5,12 +5,13 @@ import { withChild, withClass, fromTraits, withEvent } from './traits';
 
 export function slider(sendEvent, element) {
     const slider = createSlider();
+    const start = fromTraits([
+        withDraggable(sendEvent, element, 'x', element),
+        withClass(element, '_live_group'), // add clearfix hack
+        withChild(element, slider.container)
+    ]);
     return {
-        ...fromTraits([
-            withDraggable(sendEvent, element, 'x', element),
-            withClass(element, '_live_group'), // add clearfix hack
-            withChild(element, slider.container)
-        ]),
+        start,
         ...slider
     }
 }
@@ -43,7 +44,7 @@ export function rangeSlider(sendEvent, element) {
         }
     }
     
-    const sliderTraits = fromTraits([
+    const start = fromTraits([
         withEvent(element, 'mousedown', (ev) => {
             command = ev.ctrlKey || ev.shiftKey || ev.metaKey || ev.button === 2
             if (ev.button === 2 || ev.ctrlKey) 
@@ -61,7 +62,7 @@ export function rangeSlider(sendEvent, element) {
     ])
 
     return {
-        ...sliderTraits,
+        start,
         ...slider
     }
 }

@@ -6,4 +6,5 @@ export function clamp(val, min, max) {
 export function cancelEvent(ev) {
     ev.preventDefault();
     ev.stopPropagation();
+    return cancelEvent;
 }

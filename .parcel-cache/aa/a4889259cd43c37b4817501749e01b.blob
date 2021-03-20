@@ -1,0 +1,65 @@
+var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+_parcelHelpers.defineInteropFlag(exports);
+_parcelHelpers.export(exports, "dimensions", function () {
+  return dimensions;
+});
+_parcelHelpers.export(exports, "Orientation", function () {
+  return Orientation;
+});
+_parcelHelpers.export(exports, "createOrientation", function () {
+  return createOrientation;
+});
+const xAxis = {
+  position: {
+    start: 'left',
+    end: 'right'
+  },
+  dimension: 'width',
+  client: 'clientWidth',
+  inner: 'innerWidth'
+};
+const yAxis = {
+  position: {
+    start: 'top',
+    end: 'bottom'
+  },
+  dimension: 'height',
+  client: 'clientHeight',
+  inner: 'innerHeight'
+};
+const dimensions = {
+  x: {
+    primary: xAxis,
+    secondary: yAxis
+  },
+  y: {
+    primary: yAxis,
+    secondary: xAxis
+  }
+};
+class Orientation {
+  constructor(axis) {
+    this.axis = axis;
+    this.primary = dimensions[axis];
+  }
+  getPositionOnAxis(ev) {
+    return axis === 'x' ? o.clientX : o.clientY;
+  }
+  getMin(el) {
+    if (el instanceof Window) {
+      return window[this.primary.inner] / 3;
+    } else return el.getBoundingClientRect()[this.primary.position.start];
+  }
+  getMax(el) {
+    if (el instanceof Window) {
+      return 2 * window[primary.inner] / 3;
+    } else return el[primary.client];
+  }
+}
+function createOrientation(axis) {
+  let {primary} = dimensions[axis];
+  return {
+    getPositionOnAxis: o => axis === 'x' ? o.clientX : o.clientY,
+    getMin: el => {}
+  };
+}

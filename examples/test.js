@@ -16,7 +16,7 @@ function update(value, pos) {
 function display(x) {
   first.innerText = (55 * x[0] + 3).toPrecision(2);
   second.innerText = (55 * x[1] + 3).toPrecision(2);
-  s.setRange(x)
+  range.setRange(x)
 }
 
 
@@ -30,9 +30,9 @@ let dragTwo = live.makeDraggable((
 dragOne.start();
 dragTwo.start();
 
-let s = live.rangeSlider((ev) => {
+let range = live.rangeSlider((ev) => {
   store = ev.nextRange(store)
   display(store)
 }, $("#slider"))
 
-s.start();
+range.start();

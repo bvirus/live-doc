@@ -1,44 +1,50 @@
 import { cancelEvent, clamp } from './util.js'
-import { trait, fromTraits, withEvent, withClass } from './traits';
-import { createOrientation } from './dimensions';
+import { fromTraits, withEvent, withClass, withAttribute } from './traits';
+import { Orientation } from './dimensions';
 
 export function withDraggable(sendEvent, element, axis = "x", container = window) {
-    const ori = createOrientation(axis)
+    const ori = new Orientation(axis)
 
     function computeValue(ev) {
-        
         let pos = ori.getPositionOnAxis(ev)
         let zeroPos = ori.getMin(element)
         let maxPos = ori.getMax(container)
         return { event: ev, value : clamp((pos - zeroPos) / maxPos, 0, 1) }
     }
 
-    const dragging = fromTraits([
+    const sendMove = (ev) => { 
+        cancelEvent(ev); 
+        sendEvent({ type : 'move', ...computeValue(ev) }); 
+    };
+
+    const startDragging = fromTraits([
+        cancelEvent,
         withClass(element, 'live-active'),
-        withEvent(window, 'mousemove', (ev) => {
-            cancelEvent(ev)
-            sendEvent({ type : 'move', ...computeValue(ev) })
-        }),
-        Object.freeze({
-            start: (ev) => { cancelEvent(ev); sendEvent({ type : 'start', ...computeValue(ev) }) },
-            stop: (ev) =>  { cancelEvent(ev); sendEvent({ type: 'stop', ...computeValue(ev) }) }
-        })
+        withEvent(window, 'mousemove', sendMove),
+        // withEvent(window, 'touchmove', sendMove),
+        (ev) => {
+            sendEvent({ type : 'start', ...computeValue(ev) });
+            return (ev) => {
+                sendEvent({ type: 'stop', ...computeValue(ev) })
+            }
+        }
     ])
     
     function dragStart(ev) {
-        cancelEvent(ev);
-        dragging.start(ev);
-        window.addEventListener('mouseup', (e) => { 
-            cancelEvent(e); 
-            dragging.stop(e);
-        }, { once: true });
-        
+        const stop = startDragging(ev);
+        window.addEventListener('mouseup', stop, { once: true });
+        // window.addEventListener('touchend', stop, { once: true });
     }
 
     return fromTraits([
-        withEvent(element, 'mousedown', dragStart), 
+        withEvent(element, 'mousedown', dragStart),
+        // withEvent(element, 'touchstart', dragStart),
+        withAttribute(element, 'draggable', 'true'),
         withClass(element, 'live')
     ])
 }
 
-export const makeDraggable = withDraggable
+export const makeDraggable = (...args) => {
+    const start = withDraggable(...args);
+    return { start };
+}

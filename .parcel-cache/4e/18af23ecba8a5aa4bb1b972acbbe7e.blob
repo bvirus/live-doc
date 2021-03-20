@@ -1,0 +1,15 @@
+var _parcelHelpers = require("@parcel/transformer-js/lib/esmodule-helpers.js");
+_parcelHelpers.defineInteropFlag(exports);
+_parcelHelpers.export(exports, "clamp", function () {
+  return clamp;
+});
+_parcelHelpers.export(exports, "cancelEvent", function () {
+  return cancelEvent;
+});
+function clamp(val, min, max) {
+  return Math.max(min, Math.min(val, max));
+}
+function cancelEvent(ev) {
+  ev.preventDefault();
+  ev.stopPropagation();
+}

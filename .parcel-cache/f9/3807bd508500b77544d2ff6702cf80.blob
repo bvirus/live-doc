@@ -1,0 +1,26 @@
+var _index = require('../index');
+require('../default-theme.css');
+require('./test.css');
+let $ = (...args) => document.querySelector(...args);
+let firstOut = $("#first-number-out");
+let first = $("#first-number");
+let second = $("#second-number");
+let store = [0.1, 0.5];
+function update(value, pos) {
+  store[pos] = value;
+  display(store);
+}
+function display(x) {
+  first.innerText = (55 * x[0] + 3).toPrecision(2);
+  second.innerText = (55 * x[1] + 3).toPrecision(2);
+  s.setRange(x);
+}
+let dragOne = _index.makeDraggable(({value}) => update(Math.min(value, store[1]), 0), first);
+let dragTwo = _index.makeDraggable(({value}) => update(Math.max(value, store[0]), 1), second);
+dragOne();
+dragTwo();
+let range = _index.rangeSlider(ev => {
+  store = ev.nextRange(store);
+  display(store);
+}, $("#slider"));
+range();
