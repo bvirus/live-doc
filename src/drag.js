@@ -39,7 +39,7 @@ export function withDraggable(sendEvent, element, axis = "x", container = window
     return fromTraits([
         withEvent(element, 'mousedown', dragStart),
         // withEvent(element, 'touchstart', dragStart),
-        withAttribute(element, 'draggable', 'true'),
+        // withAttribute(element, 'draggable', 'true'),
         withClass(element, 'live')
     ])
 }
